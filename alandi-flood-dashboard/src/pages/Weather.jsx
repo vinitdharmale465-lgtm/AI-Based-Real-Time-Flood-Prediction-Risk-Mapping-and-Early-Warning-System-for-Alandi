@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from 'react';
 
 import {
@@ -160,7 +159,17 @@ export default function Weather() {
         }
       );
 
-      const result = await response.json();
+    const text = await response.text();
+
+let result;
+
+try {
+  result = JSON.parse(text);
+} catch {
+  throw new Error(
+    `API returned HTML instead of JSON. Status: ${response.status}. Check API URL and backend route.`
+  );
+}
 
       if (!response.ok || !result.success) {
         throw new Error(

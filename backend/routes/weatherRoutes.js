@@ -458,3 +458,54 @@ router.get("/history/daily", async (req, res) => {
 // =====================================
 
 module.exports = router;
+module.exports = router;
+
+// =====================================
+// 3. HISTORICAL WEATHER API
+// Alandi - 2024 to 2025
+// =====================================
+
+router.get("/history", async (req, res) => {
+    try {
+        const url =
+            "https://archive-api.open-meteo.com/v1/archive" +
+            "?latitude=18.67756" +
+            "&longitude=73.89868" +
+            "&start_date=2024-01-01" +
+            "&end_date=2025-12-31" +
+            "&daily=precipitation_sum,rain_sum,temperature_2m_mean,relative_humidity_2m_mean" +
+            "&timezone=Asia%2FKolkata";
+
+        const response = await fetch(url);
+        const data = await response.json();
+
+        if (!response.ok) {
+            return res.status(response.status).json({
+                message: data.reason || "Historical weather API failed"
+            });
+        }
+
+        const history = data.daily.time.map((date, index) => ({
+            date: date,
+            rainfall: data.daily.rain_sum[index],
+            precipitation: data.daily.precipitation_sum[index],
+            temperature: data.daily.temperature_2m_mean[index],
+            humidity: data.daily.relative_humidity_2m_mean[index]
+        }));
+
+        res.json({
+            location: "Alandi",
+            source: "Open-Meteo Historical Weather API",
+            dataType: "Historical weather reanalysis",
+            totalRecords: history.length,
+            history: history
+        });
+
+    } catch (error) {
+        console.log("Historical Weather Error:", error.message);
+
+        res.status(500).json({
+            message: "Unable to fetch historical weather data"
+        });
+    }
+});

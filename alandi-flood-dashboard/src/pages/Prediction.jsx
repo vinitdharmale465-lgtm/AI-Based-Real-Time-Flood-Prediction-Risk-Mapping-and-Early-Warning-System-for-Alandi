@@ -1,6 +1,14 @@
 
 import { useEffect, useState } from 'react';
-import { Info, Gauge, CloudRain, Droplets, Thermometer, Wind, RefreshCw } from 'lucide-react';
+import {
+  Info,
+  Gauge,
+  CloudRain,
+  Droplets,
+  Thermometer,
+  Wind,
+  RefreshCw
+} from 'lucide-react';
 
 export default function Prediction() {
   const [data, setData] = useState(null);
@@ -13,13 +21,25 @@ export default function Prediction() {
       setError('');
 
       const response = await fetch(
-        'http://localhost:5000/api/flood/predict'
+        'http://127.0.0.1:5000/api/flood/predict'
       );
 
-      const result = await response.json();
+      const text = await response.text();
+
+      let result;
+
+      try {
+        result = JSON.parse(text);
+      } catch {
+        throw new Error(
+          `API returned HTML or invalid JSON. Status: ${response.status}. Check backend URL and route.`
+        );
+      }
 
       if (!response.ok) {
-        throw new Error(result.message || 'Unable to fetch prediction');
+        throw new Error(
+          result.message || 'Unable to fetch prediction'
+        );
       }
 
       setData(result);
@@ -49,7 +69,9 @@ export default function Prediction() {
     return (
       <div className="card">
         <h3>Loading Flood Prediction...</h3>
-        <p className="muted">Fetching live weather information for Alandi.</p>
+        <p className="muted">
+          Fetching live weather information for Alandi.
+        </p>
       </div>
     );
   }
@@ -59,6 +81,7 @@ export default function Prediction() {
       <div className="card">
         <h3>Prediction Error</h3>
         <p className="err">{error}</p>
+
         <button className="btn" onClick={fetchPrediction}>
           <RefreshCw size={15} /> Try Again
         </button>
@@ -66,30 +89,35 @@ export default function Prediction() {
     );
   }
 
+  if (!data) return null;
+
   const riskColor = getRiskColor(data.risk);
 
   return (
     <div className="stack">
 
-      {/* Page Information */}
       <div className="note">
         Live weather-based flood risk assessment for Alandi.
         This is an initial rule-based model, not a validated flood warning.
       </div>
 
-      {/* Refresh Button */}
       <div className="row">
         <h2>Flood Risk Prediction</h2>
-        <button className="btn" onClick={fetchPrediction} disabled={loading}>
+
+        <button
+          className="btn"
+          onClick={fetchPrediction}
+          disabled={loading}
+        >
           <RefreshCw size={15} />
           {loading ? 'Refreshing...' : 'Refresh'}
         </button>
       </div>
 
-      {/* Main Risk Card */}
       <div className="card">
         <div className="card-head">
           <h3>Current Flood Risk - {data.location}</h3>
+
           <span
             style={{
               background: riskColor,
@@ -123,7 +151,6 @@ export default function Prediction() {
         </p>
       </div>
 
-      {/* Weather Data Cards */}
       <div className="grid g3">
 
         <div className="card">
@@ -176,7 +203,6 @@ export default function Prediction() {
 
       </div>
 
-      {/* Prediction Explanation */}
       <div className="card">
         <div className="card-head">
           <h3><Gauge size={17} /> Why this prediction?</h3>
