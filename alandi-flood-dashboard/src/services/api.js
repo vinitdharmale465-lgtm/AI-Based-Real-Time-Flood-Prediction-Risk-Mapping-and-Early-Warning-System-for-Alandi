@@ -1,5 +1,5 @@
 
-const API_URL = "http://localhost:5000/api";
+const API_URL = 'https://alandi-flood-backend.onrender.com/';
 
 // =====================================
 // 1. SUBMIT COMMUNITY REPORT

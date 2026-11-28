@@ -56,7 +56,7 @@ export default function Weather() {
   const fetchWeather = async () => {
     try {
       const response = await fetch(
-        'http://localhost:5000/api/weather/current'
+        'https://alandi-flood-backend.onrender.com/'
       );
 
       const data = await response.json();
@@ -78,7 +78,7 @@ export default function Weather() {
   const fetchForecast = async () => {
     try {
       const response = await fetch(
-        'http://localhost:5000/api/weather/forecast'
+       'https://alandi-flood-backend.onrender.com/'
       );
 
       const data = await response.json();
@@ -149,7 +149,7 @@ export default function Weather() {
       };
 
       const response = await fetch(
-        'http://localhost:5000/api/predict-risk',
+        'https://alandi-flood-backend.onrender.com/',
         {
           method: 'POST',
           headers: {

@@ -13,7 +13,7 @@ const Ctx = createContext(null);
 
 export const useApp = () => useContext(Ctx);
 
-const API_URL = 'http://localhost:5000/api/auth';
+const API_URL = 'https://alandi-flood-backend.onrender.com/';
 
 export function AppProvider({ children }) {
 
