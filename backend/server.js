@@ -44,7 +44,7 @@ app.use("/api/auth", require("./routes/authRoutes"));
 app.use("/api/flood", require("./routes/floodRoutes"));
 app.use("/api", require("./routes/mlRoutes"));
 
-const PORT = process.env.PORT || 5000;
+//
 
 // MongoDB connection
 mongoose.connect(process.env.MONGO_URI)
@@ -58,3 +58,8 @@ mongoose.connect(process.env.MONGO_URI)
     .catch((error) => {
         console.log("MongoDB Connection Error:", error.message);
     });
+    const PORT = process.env.PORT || 5000;
+
+app.listen(PORT, "0.0.0.0", () => {
+  console.log(`Server running on port ${PORT}`);
+});
