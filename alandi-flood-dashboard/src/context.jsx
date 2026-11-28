@@ -13,7 +13,13 @@ const Ctx = createContext(null);
 
 export const useApp = () => useContext(Ctx);
 
-const API_URL = 'https://alandi-flood-backend.onrender.com/';
+// BACKEND API URL
+const API_URL = (
+  import.meta.env.VITE_API_URL ||
+  'https://alandi-flood-backend.onrender.com'
+).replace(/\/+$/, '');
+
+const AUTH_URL = `${API_URL}/api/auth`;
 
 export function AppProvider({ children }) {
 
@@ -60,7 +66,7 @@ export function AppProvider({ children }) {
   // CHECK EXISTING LOGIN SESSION
   const checkAuth = useCallback(async () => {
     try {
-      const response = await fetch(`${API_URL}/me`, {
+      const response = await fetch(`${AUTH_URL}/me`, {
         method: 'GET',
         credentials: 'include'
       });
@@ -72,7 +78,6 @@ export function AppProvider({ children }) {
 
       const data = await response.json();
 
-      // CHECK USER ROLE IN BROWSER CONSOLE
       console.log('Logged-in user:', data.user);
 
       setUser(data.user);
@@ -95,7 +100,7 @@ export function AppProvider({ children }) {
 
   // LOGIN
   const login = async (email, password) => {
-    const response = await fetch(`${API_URL}/login`, {
+    const response = await fetch(`${AUTH_URL}/login`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -110,7 +115,6 @@ export function AppProvider({ children }) {
       throw new Error(data.message || 'Login failed');
     }
 
-    // CHECK LOGIN USER ROLE
     console.log('Login user:', data.user);
 
     setUser(data.user);
@@ -120,7 +124,7 @@ export function AppProvider({ children }) {
 
   // SIGNUP
   const signup = async (name, email, password) => {
-    const response = await fetch(`${API_URL}/signup`, {
+    const response = await fetch(`${AUTH_URL}/signup`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -140,25 +144,20 @@ export function AppProvider({ children }) {
 
   // LOGOUT
   const logout = async () => {
-    try {
-      const response = await fetch(`${API_URL}/logout`, {
-        method: 'POST',
-        credentials: 'include'
-      });
+    const response = await fetch(`${AUTH_URL}/logout`, {
+      method: 'POST',
+      credentials: 'include'
+    });
 
-      const data = await response.json();
+    const data = await response.json();
 
-      if (!response.ok) {
-        throw new Error(data.message || 'Logout failed');
-      }
-
-      setUser(null);
-
-      return data;
-
-    } catch (error) {
-      throw error;
+    if (!response.ok) {
+      throw new Error(data.message || 'Logout failed');
     }
+
+    setUser(null);
+
+    return data;
   };
 
   // CONTEXT VALUES

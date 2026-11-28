@@ -1,12 +1,18 @@
 
-const API_URL = 'https://alandi-flood-backend.onrender.com/';
+const API_URL = (
+    import.meta.env.VITE_API_URL ||
+    'https://alandi-flood-backend.onrender.com'
+).replace(/\/+$/, '');
+
+const REPORTS_URL = `${API_URL}/api/reports`;
+const WEATHER_URL = `${API_URL}/api/weather`;
 
 // =====================================
 // 1. SUBMIT COMMUNITY REPORT
 // =====================================
 
 export async function submitReport(data) {
-    const response = await fetch(`${API_URL}/reports`, {
+    const response = await fetch(`${REPORTS_URL}`, {
         method: "POST",
         headers: {
             "Content-Type": "application/json"
@@ -23,13 +29,12 @@ export async function submitReport(data) {
     return result;
 }
 
-
 // =====================================
 // 2. GET COMMUNITY REPORTS
 // =====================================
 
 export async function getReports() {
-    const response = await fetch(`${API_URL}/reports`);
+    const response = await fetch(`${REPORTS_URL}`);
 
     if (!response.ok) {
         throw new Error("Failed to fetch reports");
@@ -38,14 +43,13 @@ export async function getReports() {
     return response.json();
 }
 
-
 // =====================================
 // 3. GET HOURLY HISTORICAL RAINFALL
 // =====================================
 
 export async function getHourlyRainfall() {
     const response = await fetch(
-        `${API_URL}/weather/history/hourly?limit=500`
+        `${WEATHER_URL}/history/hourly?limit=500`
     );
 
     if (!response.ok) {
@@ -55,14 +59,13 @@ export async function getHourlyRainfall() {
     return response.json();
 }
 
-
 // =====================================
 // 4. GET DAILY HISTORICAL RAINFALL
 // =====================================
 
 export async function getDailyRainfall() {
     const response = await fetch(
-        `${API_URL}/weather/history/daily?limit=500`
+        `${WEATHER_URL}/history/daily?limit=500`
     );
 
     if (!response.ok) {
@@ -72,13 +75,12 @@ export async function getDailyRainfall() {
     return response.json();
 }
 
-
 // =====================================
 // 5. GET CURRENT WEATHER
 // =====================================
 
 export async function getCurrentWeather() {
-    const response = await fetch(`${API_URL}/weather/current`);
+    const response = await fetch(`${WEATHER_URL}/current`);
 
     if (!response.ok) {
         throw new Error("Failed to fetch current weather");
@@ -87,13 +89,12 @@ export async function getCurrentWeather() {
     return response.json();
 }
 
-
 // =====================================
 // 6. GET WEATHER FORECAST
 // =====================================
 
 export async function getWeatherForecast() {
-    const response = await fetch(`${API_URL}/weather/forecast`);
+    const response = await fetch(`${WEATHER_URL}/forecast`);
 
     if (!response.ok) {
         throw new Error("Failed to fetch weather forecast");
@@ -102,13 +103,12 @@ export async function getWeatherForecast() {
     return response.json();
 }
 
-
 // =====================================
 // 7. GET HISTORICAL WEATHER
 // =====================================
 
 export async function getHistoricalWeather() {
-    const response = await fetch(`${API_URL}/weather/historical`);
+    const response = await fetch(`${WEATHER_URL}/historical`);
 
     if (!response.ok) {
         throw new Error("Failed to fetch historical weather");
