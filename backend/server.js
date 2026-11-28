@@ -16,7 +16,7 @@ const app = express();
 
 
 
-const cors = require("cors");
+
 
 const frontendOrigin = (process.env.FRONTEND_URL || "")
   .trim()
