@@ -14,25 +14,31 @@ const app = express();
 // CORS CONFIGURATION
 // ===============================
 
+
+const frontendOrigin = (process.env.FRONTEND_URL || "")
+  .trim()
+  .replace(/\/$/, "");
+
 const allowedOrigins = [
   "http://localhost:5173",
   "https://ai-based-real-time-flood-prediction-eight.vercel.app",
-  process.env.FRONTEND_URL
+  frontendOrigin
 ].filter(Boolean);
 
 app.use(
   cors({
     origin: function (origin, callback) {
-      // Allow requests without origin (Postman, server-to-server)
       if (!origin || allowedOrigins.includes(origin)) {
         return callback(null, true);
       }
 
+      console.error("CORS blocked origin:", origin);
       return callback(new Error("Not allowed by CORS"));
     },
     credentials: true
   })
 );
+
 
 // ===============================
 // MIDDLEWARE
