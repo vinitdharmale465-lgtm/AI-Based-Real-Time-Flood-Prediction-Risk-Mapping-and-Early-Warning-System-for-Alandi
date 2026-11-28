@@ -25,10 +25,14 @@ const frontendOrigin = (process.env.FRONTEND_URL || "")
 app.use(
   cors({
     origin: function (origin, callback) {
-      const allowedOrigins = [
-        "http://localhost:5173",
-        frontendOrigin,
-      ].filter(Boolean);
+      
+const allowedOrigins = [
+  "http://localhost:5173",
+  "https://ai-based-real-time-flood-prediction-risk-mapping-zf45dcz15.vercel.app",
+  "https://ai-based-real-time-flood-prediction-risk-mapping-mkovcklp1.vercel.app",
+  frontendOrigin,
+].filter(Boolean);
+
 
       if (!origin || allowedOrigins.includes(origin)) {
         return callback(null, true);
