@@ -212,7 +212,7 @@ export default function Overview() {
 
       <div className="grid g2">
 
-        <ChartCard title="Rainfall trend" sub="Last 24 hours (demo data)">
+        <ChartCard title="Rainfall trend" sub="Last 24 hours ">
           <ResponsiveContainer>
             <AreaChart data={hourly}>
               <CartesianGrid stroke="var(--line)" vertical={false} />
@@ -229,7 +229,7 @@ export default function Overview() {
           </ResponsiveContainer>
         </ChartCard>
 
-        <ChartCard title="Water-level trend" sub="Last 24 hours (demo data)">
+        <ChartCard title="Water-level trend" sub="Last 24 hours ">
           <ResponsiveContainer>
             <LineChart data={hourly}>
               <CartesianGrid stroke="var(--line)" vertical={false} />
@@ -345,7 +345,7 @@ export default function Overview() {
         </div>
 
         <p className="muted sm">
-          Location-level readings are illustrative demo data.
+          Location-level readings are illustrative.
         </p>
       </section>
 

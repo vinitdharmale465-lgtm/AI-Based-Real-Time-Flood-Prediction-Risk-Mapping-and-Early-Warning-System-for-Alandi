@@ -12,11 +12,25 @@ export function StatCard({ icon: Icon, label, value, unit, hint, tone = 'primary
   );
 }
 
-export function ChartCard({ title, sub, children, height = 260, className = '' }) {
+export function ChartCard({
+  title,
+  sub,
+  children,
+  height = 260,
+  className = ''
+}) {
   return (
     <section className={`card ${className}`}>
-      <div className="card-head"><div><h3>{title}</h3>{sub && <p className="muted sm">{sub}</p>}</div><DemoTag /></div>
-      <div style={{ height, width: '100%' }}>{children}</div>
+      <div className="card-head">
+        <div>
+          <h3>{title}</h3>
+          {sub && <p className="muted sm">{sub}</p>}
+        </div>
+      </div>
+
+      <div style={{ height, width: '100%' }}>
+        {children}
+      </div>
     </section>
   );
 }

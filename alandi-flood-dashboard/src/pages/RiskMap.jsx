@@ -8,7 +8,7 @@ export default function RiskMap() {
   const shown = f === 'All' ? locations : locations.filter((l) => l.risk === f);
   return (
     <div className="stack">
-      <div className="note">Marker positions and risk levels are illustrative demo data, not surveyed flood zones.</div>
+      <div className="note">Marker positions and risk levels are illustrative , not surveyed flood zones.</div>
       <div className="chips">
         {['All', ...Object.keys(RISK)].map((x) => <button key={x} className={`chip ${f === x ? 'on' : ''}`} onClick={() => setF(x)}>{x}</button>)}
         <DemoTag text="Illustrative Data" />
