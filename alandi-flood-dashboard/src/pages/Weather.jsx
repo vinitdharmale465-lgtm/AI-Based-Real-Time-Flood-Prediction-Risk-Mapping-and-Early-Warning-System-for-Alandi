@@ -33,6 +33,31 @@ import {
   getDailyRainfall
 } from '../services/api.js';
 
+const API_URL = 'https://alandi-flood-backend.onrender.com';
+
+async function fetchJSON(url, options = {}) {
+  const response = await fetch(url, options);
+  const text = await response.text();
+
+  let data;
+
+  try {
+    data = JSON.parse(text);
+  } catch {
+    throw new Error(
+      `Backend returned non-JSON response. Status: ${response.status}. URL: ${url}`
+    );
+  }
+
+  if (!response.ok) {
+    throw new Error(
+      data.message || data.error || `Request failed: ${response.status}`
+    );
+  }
+
+  return data;
+}
+
 export default function Weather() {
   const [weatherData, setWeatherData] = useState(null);
   const [forecastData, setForecastData] = useState([]);
@@ -55,15 +80,9 @@ export default function Weather() {
   // Current weather API
   const fetchWeather = async () => {
     try {
-      const response = await fetch(
-        'https://alandi-flood-backend.onrender.com/'
+      const data = await fetchJSON(
+        `${API_URL}/api/weather/current`
       );
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || 'Weather fetch failed');
-      }
 
       setWeatherData(data);
       setError('');
@@ -77,15 +96,9 @@ export default function Weather() {
   // Weather forecast API
   const fetchForecast = async () => {
     try {
-      const response = await fetch(
-       'https://alandi-flood-backend.onrender.com/'
+      const data = await fetchJSON(
+        `${API_URL}/api/weather/forecast`
       );
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || 'Forecast fetch failed');
-      }
 
       setForecastData(data.forecast || []);
       setForecastError('');
@@ -148,8 +161,8 @@ export default function Weather() {
         rainfall_24h: Number(w.rainfall24h ?? 0)
       };
 
-      const response = await fetch(
-        'https://alandi-flood-backend.onrender.com/',
+      const result = await fetchJSON(
+        `${API_URL}/api/predict-risk`,
         {
           method: 'POST',
           headers: {
@@ -159,19 +172,7 @@ export default function Weather() {
         }
       );
 
-    const text = await response.text();
-
-let result;
-
-try {
-  result = JSON.parse(text);
-} catch {
-  throw new Error(
-    `API returned HTML instead of JSON. Status: ${response.status}. Check API URL and backend route.`
-  );
-}
-
-      if (!response.ok || !result.success) {
+      if (!result.success) {
         throw new Error(
           result.error || 'ML prediction failed'
         );

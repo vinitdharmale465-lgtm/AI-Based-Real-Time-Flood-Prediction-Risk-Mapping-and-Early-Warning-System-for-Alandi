@@ -1,5 +1,6 @@
 
 import { useEffect, useState } from 'react';
+
 import {
   MapPin,
   CloudRain,
@@ -42,6 +43,93 @@ import {
 
 import { useApp } from '../context.jsx';
 
+const API_URL = 'https://alandi-flood-backend.onrender.com';
+
+async function fetchJSON(url) {
+  const response = await fetch(url);
+  const text = await response.text();
+
+  let data;
+
+  try {
+    data = JSON.parse(text);
+  } catch {
+    throw new Error(
+      `Backend returned non-JSON response. Status: ${response.status}`
+    );
+  }
+
+  if (!response.ok) {
+    throw new Error(
+      data.message || data.error || 'Unable to fetch weather data'
+    );
+  }
+
+  return data;
+}
+
+function calculateFloodAssessment(weather, forecastData) {
+  const currentRainfall = Number(
+    weather.rainfall ?? weather.rain ?? weather.precipitation ?? 0
+  );
+
+  const temperature = Number(weather.temperature ?? 0);
+  const humidity = Number(weather.humidity ?? 0);
+
+  const forecastRainfall = forecastData.reduce(
+    (total, item) => total + Number(item.rainfall ?? 0),
+    0
+  );
+
+  const rainChance = forecastData.length
+    ? Math.max(
+        ...forecastData.map(item =>
+          Number(item.rainProbability ?? 0)
+        )
+      )
+    : 0;
+
+  // Weather-based prototype score, not a validated flood model.
+  const score = Math.min(
+    100,
+    Math.round(
+      currentRainfall * 8 +
+      forecastRainfall * 3 +
+      rainChance * 0.25
+    )
+  );
+
+  let risk = 'Low';
+
+  if (score >= 65) {
+    risk = 'High';
+  } else if (score >= 30) {
+    risk = 'Medium';
+  }
+
+  let reason = 'Low rainfall indicators detected.';
+
+  if (risk === 'High') {
+    reason = 'High rainfall indicators and forecast rain probability detected.';
+  } else if (risk === 'Medium') {
+    reason = 'Moderate rainfall indicators detected. Monitor weather conditions.';
+  }
+
+  return {
+    currentRainfall,
+    temperature,
+    humidity,
+    rainfall: forecastRainfall,
+    rainChance,
+    risk,
+    score,
+    reason,
+    updatedAt: weather.lastUpdated
+      ? new Date(weather.lastUpdated * 1000).toLocaleString()
+      : new Date().toLocaleString()
+  };
+}
+
 export default function Overview() {
   const { alerts } = useApp();
 
@@ -50,24 +138,32 @@ export default function Overview() {
   const [error, setError] = useState('');
 
   useEffect(() => {
+    let cancelled = false;
+
     const fetchFloodData = async () => {
       try {
-        const response = await fetch(
-          'https://alandi-flood-backend.onrender.com/'
+        const [weather, forecast] = await Promise.all([
+          fetchJSON(`${API_URL}/api/weather/current`),
+          fetchJSON(`${API_URL}/api/weather/forecast`)
+        ]);
+
+        const assessment = calculateFloodAssessment(
+          weather,
+          forecast.forecast || []
         );
 
-        const data = await response.json();
-
-        if (!response.ok) {
-          throw new Error(data.message || 'Unable to fetch flood data');
+        if (!cancelled) {
+          setFloodData(assessment);
+          setError('');
         }
-
-        setFloodData(data);
-        setError('');
       } catch (err) {
-        setError(err.message);
+        if (!cancelled) {
+          setError(err.message);
+        }
       } finally {
-        setLoading(false);
+        if (!cancelled) {
+          setLoading(false);
+        }
       }
     };
 
@@ -75,10 +171,15 @@ export default function Overview() {
 
     const interval = setInterval(fetchFloodData, 300000);
 
-    return () => clearInterval(interval);
+    return () => {
+      cancelled = true;
+      clearInterval(interval);
+    };
   }, []);
 
-  const active = alerts.filter((a) => a.status === 'Active');
+  const active = alerts.filter(
+    (a) => a.status === 'Active'
+  );
 
   const riskTone =
     floodData?.risk === 'High'
@@ -120,7 +221,7 @@ export default function Overview() {
           }
           unit={floodData ? ' mm' : ''}
           tone="primary"
-          hint="Live WeatherAPI precipitation"
+          hint="Live weather data"
         />
 
         <StatCard
@@ -145,7 +246,7 @@ export default function Overview() {
           tone={floodData ? riskTone : 'safe'}
           hint={
             floodData
-              ? `Weather-based risk score: ${floodData.score}/100`
+              ? `Weather-based estimate: ${floodData.score}/100`
               : 'Waiting for live data'
           }
         />
@@ -193,7 +294,7 @@ export default function Overview() {
           </p>
 
           <p>
-            <strong>Daily rainfall forecast:</strong> {floodData.rainfall} mm
+            <strong>Forecast rainfall:</strong> {floodData.rainfall.toFixed(2)} mm
           </p>
 
           <p>
@@ -205,17 +306,23 @@ export default function Overview() {
           </p>
 
           <p className="muted sm">
-            This is a weather-based estimate, not an official flood warning.
+            Prototype weather-based estimate only. This is not an official flood warning.
           </p>
         </section>
       )}
 
       <div className="grid g2">
 
-        <ChartCard title="Rainfall trend" sub="Last 24 hours (demo data)">
+        <ChartCard
+          title="Rainfall trend"
+          sub="Last 24 hours (demo data)"
+        >
           <ResponsiveContainer>
             <AreaChart data={hourly}>
-              <CartesianGrid stroke="var(--line)" vertical={false} />
+              <CartesianGrid
+                stroke="var(--line)"
+                vertical={false}
+              />
               <XAxis dataKey="t" {...axis} interval={3} />
               <YAxis {...axis} />
               <Tooltip {...tip} />
@@ -229,10 +336,16 @@ export default function Overview() {
           </ResponsiveContainer>
         </ChartCard>
 
-        <ChartCard title="Water-level trend" sub="Last 24 hours(demo data)">
+        <ChartCard
+          title="Water-level trend"
+          sub="Last 24 hours (demo data)"
+        >
           <ResponsiveContainer>
             <LineChart data={hourly}>
-              <CartesianGrid stroke="var(--line)" vertical={false} />
+              <CartesianGrid
+                stroke="var(--line)"
+                vertical={false}
+              />
               <XAxis dataKey="t" {...axis} interval={3} />
               <YAxis {...axis} domain={[0, 9]} />
               <Tooltip {...tip} />
