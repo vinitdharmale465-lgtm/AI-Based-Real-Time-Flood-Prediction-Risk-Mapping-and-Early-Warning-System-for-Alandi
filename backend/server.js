@@ -15,19 +15,21 @@ const app = express();
 // ===============================
 
 
+
+const cors = require("cors");
+
 const frontendOrigin = (process.env.FRONTEND_URL || "")
   .trim()
   .replace(/\/$/, "");
 
-const allowedOrigins = [
-  "http://localhost:5173",
-  "https://ai-based-real-time-flood-prediction-six.vercel.app",
-  frontendOrigin
-].filter(Boolean);
-
 app.use(
   cors({
     origin: function (origin, callback) {
+      const allowedOrigins = [
+        "http://localhost:5173",
+        frontendOrigin,
+      ].filter(Boolean);
+
       if (!origin || allowedOrigins.includes(origin)) {
         return callback(null, true);
       }
@@ -35,7 +37,7 @@ app.use(
       console.error("CORS blocked origin:", origin);
       return callback(new Error("Not allowed by CORS"));
     },
-    credentials: true
+    credentials: true,
   })
 );
 
