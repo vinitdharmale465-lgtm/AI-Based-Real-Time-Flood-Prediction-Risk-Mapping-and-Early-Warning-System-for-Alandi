@@ -21,7 +21,7 @@ const frontendOrigin = (process.env.FRONTEND_URL || "")
 
 const allowedOrigins = [
   "http://localhost:5173",
-  "https://ai-based-real-time-flood-prediction-eight.vercel.app",
+  "https://ai-based-real-time-flood-prediction-six.vercel.app",
   frontendOrigin
 ].filter(Boolean);
 
